@@ -15,14 +15,10 @@ const (
 )
 
 type (
-	LicenseResolver interface {
-		Resolve(context.Context, *deps.DependencyNode) ([]string, error)
-	}
-
 	ParseOptionSet struct {
 		cacheReader  deps.CacheReader
 		cacheWriter  deps.CacheWriter
-		resolver     LicenseResolver
+		resolver     deps.LicenseResolverFunc
 		numOfWorkers uint64
 	}
 	ParseOption func(*ParseOptionSet)
@@ -35,7 +31,7 @@ func WithCache(r deps.CacheReader, w deps.CacheWriter) ParseOption {
 	}
 }
 
-func WithLicenseResolver(resolver LicenseResolver) ParseOption {
+func WithLicenseResolver(resolver deps.LicenseResolverFunc) ParseOption {
 	return func(set *ParseOptionSet) {
 		set.resolver = resolver
 	}
@@ -47,17 +43,11 @@ func WithParallelization(numOfWorkers uint64) ParseOption {
 	}
 }
 
-func noOpLicenseResolver() LicenseResolverFunc {
-	return func(_ context.Context, _ *deps.DependencyNode) ([]string, error) {
-		return nil, nil
-	}
-}
-
 func Parse(source string, opts ...ParseOption) (*deps.DependencyNode, error) {
 	optionSet := ParseOptionSet{
 		cacheReader:  deps.NoOpReader(),
 		cacheWriter:  deps.NoOpWriter(),
-		resolver:     noOpLicenseResolver(),
+		resolver:     deps.NoOpLicenseResolver(),
 		numOfWorkers: 1,
 	}
 

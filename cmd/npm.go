@@ -9,17 +9,18 @@ import (
 	"github.com/ourstudio-se/lct/cmd/input"
 	"github.com/ourstudio-se/lct/cmd/output"
 	"github.com/ourstudio-se/lct/internal/deps"
-	"github.com/ourstudio-se/lct/internal/gomod"
+	"github.com/ourstudio-se/lct/internal/npm"
 	"github.com/spf13/cobra"
 )
 
 const (
-	godevHTTPClientTimeout = time.Second * 3
+	withoutDevDepsArgName  = "without-dev"
+	npmjsHTTPClientTimeout = time.Second * 3
 )
 
 var (
-	runGoModCmd = &cobra.Command{
-		Use: "gomod",
+	runNpmCmd = &cobra.Command{
+		Use: "npm",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			source, err := io.ReadAll(cmd.InOrStdin())
 			if err != nil {
@@ -32,12 +33,18 @@ var (
 			}
 			defer close()
 
-			graph, err := gomod.Parse(string(source),
-				gomod.WithCache(r, w),
-				gomod.WithParallelization(deps.DefaultParallelizationLevel),
-				gomod.WithLicenseResolver(gomod.GoDevLicenseResolver(
+			withoutDevDeps, err := cmd.Flags().GetBool(withoutDevDepsArgName)
+			if err != nil {
+				return err
+			}
+
+			graph, err := npm.Parse(string(source),
+				npm.WithCache(r, w),
+				npm.WithParallelization(deps.DefaultParallelizationLevel),
+				npm.WithDevelopmentDependencies(!withoutDevDeps),
+				npm.WithLicenseResolver(npm.NpmJsLicenseResolver(
 					deps.WithHTTPClient(&http.Client{
-						Timeout: godevHTTPClientTimeout,
+						Timeout: npmjsHTTPClientTimeout,
 					}),
 					deps.WithBaseContext(cmd.Context()))))
 			if err != nil {
@@ -50,5 +57,7 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(runGoModCmd)
+	rootCmd.AddCommand(runNpmCmd)
+
+	runNpmCmd.PersistentFlags().Bool(withoutDevDepsArgName, false, "exclude development dependencies")
 }

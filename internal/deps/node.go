@@ -4,8 +4,6 @@ import (
 	"fmt"
 )
 
-const LicenseUnknown = "#Unkonwn"
-
 type DependencyNode struct {
 	PackageName    string
 	PackageVersion string
