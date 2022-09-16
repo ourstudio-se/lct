@@ -13,35 +13,9 @@ import (
 	"golang.org/x/net/html"
 )
 
-type (
-	LicenseResolverOptionSet struct {
-		httpClient *http.Client
-		ctx        context.Context
-	}
-	LicenseResolverOption func(set *LicenseResolverOptionSet)
-
-	LicenseResolverFunc func(context.Context, *deps.DependencyNode) ([]string, error)
-)
-
-func (fn LicenseResolverFunc) Resolve(ctx context.Context, node *deps.DependencyNode) ([]string, error) {
-	return fn(ctx, node)
-}
-
-func WithHTTPClient(httpClient *http.Client) LicenseResolverOption {
-	return func(set *LicenseResolverOptionSet) {
-		set.httpClient = httpClient
-	}
-}
-
-func WithBaseContext(ctx context.Context) LicenseResolverOption {
-	return func(set *LicenseResolverOptionSet) {
-		set.ctx = ctx
-	}
-}
-
-func GoDevLicenseResolver(opts ...LicenseResolverOption) LicenseResolverFunc {
-	set := LicenseResolverOptionSet{
-		httpClient: &http.Client{
+func GoDevLicenseResolver(opts ...deps.LicenseResolverOption) deps.LicenseResolverFunc {
+	set := deps.LicenseResolverOptionSet{
+		HTTPClient: &http.Client{
 			Timeout: time.Second * 2,
 		},
 	}
@@ -59,18 +33,18 @@ func GoDevLicenseResolver(opts ...LicenseResolverOption) LicenseResolverFunc {
 			return node.Licenses, nil
 		}
 
-		return resolveDependencyLicenses(set.ctx, node.DisplayName(), set)
+		return resolveDependencyLicenses(set.Ctx, node.DisplayName(), set)
 	}
 }
 
-func resolveDependencyLicenses(ctx context.Context, pkg string, set LicenseResolverOptionSet) ([]string, error) {
+func resolveDependencyLicenses(ctx context.Context, pkg string, set deps.LicenseResolverOptionSet) ([]string, error) {
 	u := fmt.Sprintf("https://pkg.go.dev/%s", pkg)
 	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := set.httpClient.Do(req.WithContext(ctx))
+	resp, err := set.HTTPClient.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

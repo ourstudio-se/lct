@@ -1,6 +1,6 @@
 # lct: License Compliance Tool
 
-Resolve all licenses used by your application, to verify your license compliance level. Currently supported platforms: Go.
+Resolve all licenses used by your application, to verify your license compliance level. Currently supported platforms: Go, npm
 
 ## Install
 
@@ -8,12 +8,22 @@ Resolve all licenses used by your application, to verify your license compliance
 $ go install github.com/ourstudio-se/lct@latest
 ```
 
+## Available commands
+
+Currently supported commands are
+
+- `gomod` for parsing Go dependencies
+- `npm` for parsing NPM dependencies
+
+Use `lct [COMMAND] --help` to see more available flags.
+
 ## Basic usage
 
 The basic usage prints out all licenses used by the dependencies specified in go.mod, transitively.
 
 ```
-$ go mod graph | lct gomod 
+$ go mod graph | lct gomod
+$ cat package-lock.json | lct npm
 ```
 
 ## View dependency graph
@@ -41,7 +51,7 @@ $ go mod graph | lct gomod --no-cache
 ## Specify custom cache file
 
 ```
-$ go mod graph | lct gomod --cache-file /path/to/file.cache
+$ go mod graph | lct npm --cache-file /path/to/file.cache
 ```
 
 ## Verification
