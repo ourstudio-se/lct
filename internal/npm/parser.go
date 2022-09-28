@@ -9,6 +9,8 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
+const PackageTypeName string = "npm"
+
 type (
 	ParseOptionSet struct {
 		cacheReader                 deps.CacheReader
@@ -128,7 +130,7 @@ func parseGraph(source []byte, withDevelopmentDependencies bool) (*deps.Dependen
 		return nil, err
 	}
 
-	graph := deps.NewGraph(sg.Name)
+	graph := deps.NewGraph(sg.Name, PackageTypeName)
 	buildDependencyGraph(withDevelopmentDependencies, graph, sg.Dependencies)
 	return graph, nil
 }

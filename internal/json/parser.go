@@ -9,6 +9,7 @@ import (
 type serializableDependencyNode struct {
 	PackageName    string                       `json:"package_name"`
 	PackageVersion string                       `json:"package_version"`
+	PackageType    string                       `json:"package_type"`
 	Licenses       []string                     `json:"licenses"`
 	Dependencies   []serializableDependencyNode `json:"dependencies,omitempty"`
 }
@@ -42,6 +43,7 @@ func asSerializableNode(node *deps.DependencyNode) serializableDependencyNode {
 	return serializableDependencyNode{
 		PackageName:    node.PackageName,
 		PackageVersion: node.PackageVersion,
+		PackageType:    node.PackageType,
 		Licenses:       licenses,
 		Dependencies:   dependencies,
 	}
@@ -50,7 +52,7 @@ func asSerializableNode(node *deps.DependencyNode) serializableDependencyNode {
 func fromSerializableNode(snode serializableDependencyNode, level int) *deps.DependencyNode {
 	var node *deps.DependencyNode
 	if level == 0 {
-		node = deps.NewGraph(snode.PackageName)
+		node = deps.NewGraph(snode.PackageName, snode.PackageType)
 	} else {
 		node = deps.New(snode.PackageName, snode.PackageVersion)
 	}

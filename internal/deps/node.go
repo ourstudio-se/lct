@@ -7,17 +7,20 @@ import (
 type DependencyNode struct {
 	PackageName    string
 	PackageVersion string
+	PackageType    string
 	Licenses       []string
+	CPEs           []string
 	isRoot         bool
 	size           uint64
 	parent         *DependencyNode
 	Children       []*DependencyNode
 }
 
-func NewGraph(source string) *DependencyNode {
+func NewGraph(source string, packageType string) *DependencyNode {
 	return &DependencyNode{
 		PackageName:    source,
 		PackageVersion: "",
+		PackageType:    packageType,
 		Licenses:       nil,
 		isRoot:         true,
 		size:           1,
@@ -50,6 +53,8 @@ func (n *DependencyNode) Size() uint64 {
 }
 
 func (n *DependencyNode) Add(node *DependencyNode) {
+	node.PackageType = n.PackageType
+
 	n.Children = append(n.Children, node)
 	node.parent = n
 

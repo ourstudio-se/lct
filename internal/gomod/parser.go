@@ -10,6 +10,8 @@ import (
 )
 
 const (
+	PackageTypeName = "go-mod"
+	
 	htmlLicenseAttrID    = "data-test-id"
 	htmlLicenseAttrValue = "UnitHeader-licenses"
 )
@@ -124,7 +126,7 @@ func parseGraph(source string) (*deps.DependencyNode, error) {
 		dependencyMap[fields[0]] = append(dependencyMap[fields[0]], fields[1])
 	}
 
-	graph := deps.NewGraph(sourceModule)
+	graph := deps.NewGraph(sourceModule, PackageTypeName)
 	block := make(map[string]struct{})
 	buildDependencyGraph(graph, dependencyMap, block)
 	return graph, nil
